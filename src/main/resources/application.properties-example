@@ -1,0 +1,22 @@
+# No Web-Server
+spring.main.web-application-type=none
+
+# OAuth
+spring.security.oauth2.client.registration.sw.authorization-grant-type=client_credentials
+spring.security.oauth2.client.registration.sw.client-id=<INSERT YOUR SHOPWARE CLIENT ID>
+spring.security.oauth2.client.registration.sw.client-secret=<INSERT YOUR SHOPWARE CLIENT SECRET>
+spring.security.oauth2.client.provider.sw.token-uri=https://<INSERT YOUR SHOPWARE-DOMAIN>/api/oauth/token
+
+# Custom
+sync.printful.url=https://api.printful.com/
+sync.printful.apiKey=<INSERT YOUR PRINTFUL SHOP API KEY>
+sync.shopware.url=https://<INSERT YOUR SHOPWARE-DOMAIN>/api/
+
+# The name of your shopware tax rate
+sync.shopware.taxName=Standard rate
+
+# The name of your color option group
+sync.shopware.colorOptionGroupName=Printful_Color
+
+# The name of your size option group
+sync.shopware.sizeOptionGroupName=Printful_Size
