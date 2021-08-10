@@ -18,12 +18,13 @@ import java.util.List;
 @Slf4j
 public class ShopwareHttpClient {
 
-    public static final String ACTION_MEDIA = "_action/media/";
-    public static final String UPLOAD_EXTENSION = "/upload?extension=";
-    public static final String PROPERTY_GROUP = "property-group";
-    public static final String PRODUCT = "product";
-    public static final String CURRENCY = "currency";
-    public static final String TAX = "tax";
+    private static final String ACTION_MEDIA = "_action/media/";
+    private static final String UPLOAD_EXTENSION = "/upload?extension=";
+    private static final String PROPERTY_GROUP = "property-group";
+    private static final String PRODUCT = "product";
+    private static final String CURRENCY = "currency";
+    private static final String TAX = "tax";
+    private static final String OPTIONS = "/options";
 
     @Autowired
     @Qualifier("shopware")
@@ -31,6 +32,16 @@ public class ShopwareHttpClient {
 
     @Autowired
     private ShopwareSyncProperties shopwareSyncProperties;
+
+    public List<Product> getProducts() {
+        ProductResponse currencyResponse = shopwareWebClient.get()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT)
+                .retrieve()
+                .bodyToMono(ProductResponse.class)
+                .block();
+
+        return currencyResponse.getData();
+    }
 
     public Mono<Object> createProduct(CreateProduct product) {
 
@@ -96,7 +107,7 @@ public class ShopwareHttpClient {
     public List<PropertyGroupOption> getPropertyGroupsOptions(String groupId) {
 
         Mono<PropertyGroupOptionsResponse> propertyGroupOptionsResponseMono = shopwareWebClient.get()
-                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + groupId + "/options")
+                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + groupId + OPTIONS)
                 .retrieve()
                 .bodyToMono(PropertyGroupOptionsResponse.class);
 
@@ -106,7 +117,7 @@ public class ShopwareHttpClient {
 
     public Mono<Object> createPropertyGroupOption(String propertyGroupId, CreatePropertyGroupOption createPropertyGroupOption) {
         return shopwareWebClient.post()
-                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + propertyGroupId + "/options")
+                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + propertyGroupId + OPTIONS)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(createPropertyGroupOption), CreatePropertyGroupOption.class)
                 .exchangeToMono(response -> {

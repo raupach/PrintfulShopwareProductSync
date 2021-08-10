@@ -87,6 +87,10 @@ public class ShopwareService {
     }
 
 
+    public List<cc.raupach.sync.shopware.dto.Product> getProducts() {
+        return shopwareHttpClient.getProducts();
+    }
+
     public String createProduct(Product product, Double price, Map<String, List<PropertyGroupOption>> shopwarePropertyOptions) {
 
         String productId = getShopwareUUID();
