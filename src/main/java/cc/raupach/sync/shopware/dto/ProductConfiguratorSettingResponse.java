@@ -10,9 +10,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ProductResponse {
+public class ProductConfiguratorSettingResponse {
 
-    private List<ShopwareProduct> data;
+    private List<ProductConfiguratorSetting> data;
 
     @Override
     public String toString() {

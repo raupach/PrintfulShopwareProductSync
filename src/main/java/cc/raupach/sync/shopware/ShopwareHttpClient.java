@@ -25,6 +25,7 @@ public class ShopwareHttpClient {
     private static final String CURRENCY = "currency";
     private static final String TAX = "tax";
     private static final String OPTIONS = "/options";
+    private static final String PRODUCT_CONFIGURATOR_SETTING = "product-configurator-setting";
 
     @Autowired
     @Qualifier("shopware")
@@ -33,7 +34,7 @@ public class ShopwareHttpClient {
     @Autowired
     private ShopwareSyncProperties shopwareSyncProperties;
 
-    public List<Product> getProducts() {
+    public List<ShopwareProduct> getProducts() {
         ProductResponse currencyResponse = shopwareWebClient.get()
                 .uri(shopwareSyncProperties.getUrl() + PRODUCT)
                 .retrieve()
@@ -58,6 +59,33 @@ public class ShopwareHttpClient {
                         return Mono.empty();
                     }
                 });
+    }
+
+
+    public Mono<Object> createProductConfiguratorSetting(CreateProductConfiguratorSetting newProductConfiguratorSetting) {
+        return shopwareWebClient.post()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT_CONFIGURATOR_SETTING)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(newProductConfiguratorSetting), CreateProductConfiguratorSetting.class)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
+                        return Mono.empty();
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(ErrorContainer.class);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
+
+    public List<ProductConfiguratorSetting> getProductConfiguratorSettings() {
+        ProductConfiguratorSettingResponse productConfiguratorSettingResponse = shopwareWebClient.get()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT_CONFIGURATOR_SETTING)
+                .retrieve()
+                .bodyToMono(ProductConfiguratorSettingResponse.class)
+                .block();
+
+        return productConfiguratorSettingResponse.getData();
     }
 
     public Mono<Object> uploadMediaResourceUrl(String mediaId, MediaUrlUpload mediaUrlUpload, String extension) {
@@ -150,4 +178,5 @@ public class ShopwareHttpClient {
 
         return currencyResponse.getData();
     }
+
 }

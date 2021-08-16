@@ -7,6 +7,7 @@ import cc.raupach.sync.printful.dto.SyncVariant;
 import cc.raupach.sync.shopware.ShopwareService;
 import cc.raupach.sync.shopware.dto.PropertyGroup;
 import cc.raupach.sync.shopware.dto.PropertyGroupOption;
+import cc.raupach.sync.shopware.dto.ShopwareProduct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,25 +48,29 @@ public class SyncService implements CommandLineRunner {
             Map<BigInteger, CatalogVariant> printfulCatalogVariants = printfulService.getCatalogVariants(variants);
             Map<String, List<PropertyGroupOption>> shopwarePropertyOptions = shopwareService.updatePropertyOptions(shopwarePropertyGroups, printfulCatalogVariants);
 
-            List<cc.raupach.sync.shopware.dto.Product> existingProducts = shopwareService.getProducts();
-            Optional<cc.raupach.sync.shopware.dto.Product> existingProductOpt = findProduct(product.getId(), existingProducts);
+            List<ShopwareProduct> existingProducts = shopwareService.getProducts();
+            Optional<ShopwareProduct> existingProductOpt = findProduct(product.getId(), existingProducts);
             if (existingProductOpt.isEmpty()) {
                 // Hauptprodukt anlegen
                 String productId = shopwareService.createProduct(product, price, shopwarePropertyOptions);
 
                 // Varianten anlegen
-                variants.forEach(syncVariant -> shopwareService.createVariant(productId, syncVariant, shopwarePropertyOptions, printfulCatalogVariants));
+                Map<String, List<PropertyGroupOption>> finalShopwarePropertyOptions = shopwarePropertyOptions;
+                variants.forEach(syncVariant -> shopwareService.createVariant(productId, syncVariant, finalShopwarePropertyOptions, printfulCatalogVariants));
             } else {
-                cc.raupach.sync.shopware.dto.Product existingProduct = existingProductOpt.get();
+                ShopwareProduct existingProduct = existingProductOpt.get();
+                shopwareService.updateProductConfiguratorSetting(existingProduct.getId(), shopwarePropertyOptions);
+                shopwarePropertyOptions = shopwareService.updatePropertyOptions(shopwarePropertyGroups, printfulCatalogVariants);
+                Map<String, List<PropertyGroupOption>> finalShopwarePropertyOptions = shopwarePropertyOptions;
                 variants.stream()
                         .filter(variant-> findProduct(variant.getId(), existingProducts).isEmpty())
-                        .forEach(variant -> shopwareService.createVariant(existingProduct.getId(), variant, shopwarePropertyOptions, printfulCatalogVariants));
+                        .forEach(variant -> shopwareService.createVariant(existingProduct.getId(), variant, finalShopwarePropertyOptions, printfulCatalogVariants));
             }
         });
 
     }
 
-    private Optional<cc.raupach.sync.shopware.dto.Product> findProduct(BigInteger printfulProductId, List<cc.raupach.sync.shopware.dto.Product> existingProducts) {
+    private Optional<ShopwareProduct> findProduct(BigInteger printfulProductId, List<ShopwareProduct> existingProducts) {
         return existingProducts.stream().filter(p -> StringUtils.equals(p.getAttributes().getProductNumber(), printfulProductId.toString())).findFirst();
     }
 

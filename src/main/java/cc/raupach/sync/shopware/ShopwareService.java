@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -87,7 +88,7 @@ public class ShopwareService {
     }
 
 
-    public List<cc.raupach.sync.shopware.dto.Product> getProducts() {
+    public List<ShopwareProduct> getProducts() {
         return shopwareHttpClient.getProducts();
     }
 
@@ -349,4 +350,39 @@ public class ShopwareService {
         return retailPrice / (1 + (getTaxRate() / 100));
     }
 
+    public void updateProductConfiguratorSetting(String productId, Map<String, List<PropertyGroupOption>> shopwarePropertyOptions) {
+        List<ProductConfiguratorSetting> pcs = shopwareHttpClient.getProductConfiguratorSettings();
+        List<ProductConfiguratorSetting> existingProductConfig = pcs.stream().filter(s -> StringUtils.equals(s.getAttributes().getProductId(), productId)).collect(Collectors.toList());
+
+        List<PropertyGroupOption> colorOptions = shopwarePropertyOptions.get(shopwareSyncProperties.getColorOptionGroupName());
+        List<PropertyGroupOption> sizeOptions = shopwarePropertyOptions.get(shopwareSyncProperties.getSizeOptionGroupName());
+
+        Stream.concat(colorOptions.stream(), sizeOptions.stream())
+                .forEach(option -> {
+                    Optional<ProductConfiguratorSetting> resultOpt = existingProductConfig.stream()
+                            .filter(proConfig -> StringUtils.equals(proConfig.getAttributes().getOptionId(), option.getId()))
+                            .findFirst();
+
+                    if (resultOpt.isEmpty()) {
+                        newProductConfiguratorSetting(productId, option);
+                    }
+                });
+
+    }
+
+    private void newProductConfiguratorSetting(String productId, PropertyGroupOption option) {
+        CreateProductConfiguratorSetting newProductConfiguratorSetting = CreateProductConfiguratorSetting.builder()
+                .productId(productId)
+                .optionId(option.getId())
+                .id(getShopwareUUID())
+                .build();
+
+        Mono<Object> response = shopwareHttpClient.createProductConfiguratorSetting(newProductConfiguratorSetting);
+        Object message = response.block();
+        if (message == null) {
+            log.info("ProductConfiguratorSetting " + newProductConfiguratorSetting.getId() + " created." );
+        } else {
+            throw new RuntimeException(message.toString());
+        }
+    }
 }

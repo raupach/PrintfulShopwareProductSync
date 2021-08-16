@@ -6,13 +6,13 @@ import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.List;
-
 @Getter
 @Setter
-public class ProductResponse {
+public class ShopwareProduct {
 
-    private List<ShopwareProduct> data;
+    private String id;
+    private String type;
+    private ProductAttribute attributes;
 
     @Override
     public String toString() {

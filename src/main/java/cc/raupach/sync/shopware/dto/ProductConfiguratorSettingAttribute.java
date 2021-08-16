@@ -6,13 +6,16 @@ import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.List;
-
 @Getter
 @Setter
-public class ProductResponse {
+public class ProductConfiguratorSettingAttribute {
 
-    private List<ShopwareProduct> data;
+    private String productId;
+    private String versionId;
+    private String mediaId;
+    private String optionId;
+    private Integer position;
+    private Double price;
 
     @Override
     public String toString() {

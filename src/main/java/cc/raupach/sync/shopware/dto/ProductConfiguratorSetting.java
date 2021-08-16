@@ -8,11 +8,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Getter
 @Setter
-public class Product {
+public class ProductConfiguratorSetting {
 
     private String id;
     private String type;
-    private ProductAttribute attributes;
+    private ProductConfiguratorSettingAttribute attributes;
 
     @Override
     public String toString() {
