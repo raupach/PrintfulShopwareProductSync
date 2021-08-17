@@ -20,3 +20,6 @@ sync.shopware.colorOptionGroupName=Printful_Color
 
 # The name of your size option group
 sync.shopware.sizeOptionGroupName=Printful_Size
+
+# Initial stock level with which a product/variant is started.
+sync.shopware.initialStock=10000

@@ -15,5 +15,6 @@ public class ShopwareSyncProperties {
     private String taxName;
     private String colorOptionGroupName;
     private String sizeOptionGroupName;
+    private Integer initialStock;
 
 }
