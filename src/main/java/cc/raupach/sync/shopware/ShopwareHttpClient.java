@@ -62,11 +62,40 @@ public class ShopwareHttpClient {
     }
 
 
+    public  Mono<Object> deleteProduct(String id) {
+        return shopwareWebClient.delete()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT+ "/"+ id)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
+                        return Mono.empty();
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(ErrorContainer.class);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
+
     public Mono<Object> createProductConfiguratorSetting(CreateProductConfiguratorSetting newProductConfiguratorSetting) {
         return shopwareWebClient.post()
                 .uri(shopwareSyncProperties.getUrl() + PRODUCT_CONFIGURATOR_SETTING)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(newProductConfiguratorSetting), CreateProductConfiguratorSetting.class)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
+                        return Mono.empty();
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(ErrorContainer.class);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
+
+
+    public Mono<Object> deleteProductConfiguratorSettings(String id) {
+        return shopwareWebClient.delete()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT_CONFIGURATOR_SETTING + "/" + id)
                 .exchangeToMono(response -> {
                     if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
                         return Mono.empty();

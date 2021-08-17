@@ -274,10 +274,18 @@ public class ShopwareService {
         }
 
         Map<String, List<PropertyGroupOption>> result = new HashMap<>();
-        result.put(shopwareSyncProperties.getSizeOptionGroupName(), sizePropertyGroupOptions);
-        result.put(shopwareSyncProperties.getColorOptionGroupName(), colorPropertyGroupOptions);
+        result.put(shopwareSyncProperties.getSizeOptionGroupName(), filterOptionsSize( sizePropertyGroupOptions, printfulSizes) );
+        result.put(shopwareSyncProperties.getColorOptionGroupName(), filterOptionsColor(colorPropertyGroupOptions, printfulColors));
 
         return result;
+    }
+
+    private List<PropertyGroupOption> filterOptionsColor(List<PropertyGroupOption> colorPropertyGroupOptions, Map<String, String> printfulColors) {
+        return colorPropertyGroupOptions.stream().filter(color -> printfulColors.containsKey(color.getAttributes().getName())).collect(Collectors.toList());
+    }
+
+    private List<PropertyGroupOption> filterOptionsSize(List<PropertyGroupOption> sizePropertyGroupOptions, Set<String> printfulSizes) {
+        return sizePropertyGroupOptions.stream().filter(size -> printfulSizes.contains(size.getAttributes().getName())).collect(Collectors.toList());
     }
 
     private void createNewPropertyOption(String propertyGroupId, CreatePropertyGroupOption createPropertyGroupOption) {
@@ -357,6 +365,7 @@ public class ShopwareService {
         List<PropertyGroupOption> colorOptions = shopwarePropertyOptions.get(shopwareSyncProperties.getColorOptionGroupName());
         List<PropertyGroupOption> sizeOptions = shopwarePropertyOptions.get(shopwareSyncProperties.getSizeOptionGroupName());
 
+        // create new
         Stream.concat(colorOptions.stream(), sizeOptions.stream())
                 .forEach(option -> {
                     Optional<ProductConfiguratorSetting> resultOpt = existingProductConfig.stream()
@@ -367,6 +376,23 @@ public class ShopwareService {
                         newProductConfiguratorSetting(productId, option);
                     }
                 });
+
+        // delete non existing
+        existingProductConfig.forEach(proConfig-> {
+            Optional<PropertyGroupOption> exists = Stream.concat(colorOptions.stream(), sizeOptions.stream())
+                    .filter(option -> StringUtils.equals(option.getId(), proConfig.getAttributes().getOptionId()))
+                    .findAny();
+
+            if (exists.isEmpty()) {
+                Mono<Object> response = shopwareHttpClient.deleteProductConfiguratorSettings(proConfig.getId());
+                Object message = response.block();
+                if (message == null) {
+                    log.info("ProductConfiguratorSetting delete {}", proConfig.getId());
+                } else {
+                    throw new RuntimeException(message.toString());
+                }
+            }
+        });
 
     }
 
@@ -384,5 +410,24 @@ public class ShopwareService {
         } else {
             throw new RuntimeException(message.toString());
         }
+    }
+
+    public void deleteVariants(List<ShopwareProduct> existingShopwareVariants, List<SyncVariant> printfulVariants) {
+        existingShopwareVariants.forEach (variant -> {
+            Optional<SyncVariant> exists = printfulVariants.stream()
+                    .filter(printfulVariant -> StringUtils.equals(printfulVariant.getId().toString(), variant.getAttributes().getProductNumber()))
+                    .findAny();
+
+            if (exists.isEmpty()) {
+                // delete
+                Mono<Object> response = shopwareHttpClient.deleteProduct(variant.getId());
+                Object message = response.block();
+                if (message == null) {
+                    log.info("Product delete: {}", variant.getId() );
+                } else {
+                    throw new RuntimeException(message.toString());
+                }
+            }
+        });
     }
 }
