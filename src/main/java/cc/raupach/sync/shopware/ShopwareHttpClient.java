@@ -18,12 +18,14 @@ import java.util.List;
 @Slf4j
 public class ShopwareHttpClient {
 
-    public static final String ACTION_MEDIA = "_action/media/";
-    public static final String UPLOAD_EXTENSION = "/upload?extension=";
-    public static final String PROPERTY_GROUP = "property-group";
-    public static final String PRODUCT = "product";
-    public static final String CURRENCY = "currency";
-    public static final String TAX = "tax";
+    private static final String ACTION_MEDIA = "_action/media/";
+    private static final String UPLOAD_EXTENSION = "/upload?extension=";
+    private static final String PROPERTY_GROUP = "property-group";
+    private static final String PRODUCT = "product";
+    private static final String CURRENCY = "currency";
+    private static final String TAX = "tax";
+    private static final String OPTIONS = "/options";
+    private static final String PRODUCT_CONFIGURATOR_SETTING = "product-configurator-setting";
 
     @Autowired
     @Qualifier("shopware")
@@ -31,6 +33,16 @@ public class ShopwareHttpClient {
 
     @Autowired
     private ShopwareSyncProperties shopwareSyncProperties;
+
+    public List<ShopwareProduct> getProducts() {
+        ProductResponse currencyResponse = shopwareWebClient.get()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT)
+                .retrieve()
+                .bodyToMono(ProductResponse.class)
+                .block();
+
+        return currencyResponse.getData();
+    }
 
     public Mono<Object> createProduct(CreateProduct product) {
 
@@ -47,6 +59,62 @@ public class ShopwareHttpClient {
                         return Mono.empty();
                     }
                 });
+    }
+
+
+    public  Mono<Object> deleteProduct(String id) {
+        return shopwareWebClient.delete()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT+ "/"+ id)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
+                        return Mono.empty();
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(ErrorContainer.class);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
+
+    public Mono<Object> createProductConfiguratorSetting(CreateProductConfiguratorSetting newProductConfiguratorSetting) {
+        return shopwareWebClient.post()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT_CONFIGURATOR_SETTING)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(newProductConfiguratorSetting), CreateProductConfiguratorSetting.class)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
+                        return Mono.empty();
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(ErrorContainer.class);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
+
+
+    public Mono<Object> deleteProductConfiguratorSettings(String id) {
+        return shopwareWebClient.delete()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT_CONFIGURATOR_SETTING + "/" + id)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
+                        return Mono.empty();
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(ErrorContainer.class);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
+
+    public List<ProductConfiguratorSetting> getProductConfiguratorSettings() {
+        ProductConfiguratorSettingResponse productConfiguratorSettingResponse = shopwareWebClient.get()
+                .uri(shopwareSyncProperties.getUrl() + PRODUCT_CONFIGURATOR_SETTING)
+                .retrieve()
+                .bodyToMono(ProductConfiguratorSettingResponse.class)
+                .block();
+
+        return productConfiguratorSettingResponse.getData();
     }
 
     public Mono<Object> uploadMediaResourceUrl(String mediaId, MediaUrlUpload mediaUrlUpload, String extension) {
@@ -96,7 +164,7 @@ public class ShopwareHttpClient {
     public List<PropertyGroupOption> getPropertyGroupsOptions(String groupId) {
 
         Mono<PropertyGroupOptionsResponse> propertyGroupOptionsResponseMono = shopwareWebClient.get()
-                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + groupId + "/options")
+                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + groupId + OPTIONS)
                 .retrieve()
                 .bodyToMono(PropertyGroupOptionsResponse.class);
 
@@ -106,7 +174,7 @@ public class ShopwareHttpClient {
 
     public Mono<Object> createPropertyGroupOption(String propertyGroupId, CreatePropertyGroupOption createPropertyGroupOption) {
         return shopwareWebClient.post()
-                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + propertyGroupId + "/options")
+                .uri(shopwareSyncProperties.getUrl() + PROPERTY_GROUP + "/" + propertyGroupId + OPTIONS)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(createPropertyGroupOption), CreatePropertyGroupOption.class)
                 .exchangeToMono(response -> {
@@ -139,4 +207,5 @@ public class ShopwareHttpClient {
 
         return currencyResponse.getData();
     }
+
 }
