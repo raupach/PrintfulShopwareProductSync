@@ -16,6 +16,7 @@ The tool is used to synchronize products from a Printful store into a Shopware 6
 - Deleted variants in Printful are also deleted in Shopware.
 - New variant options (size/color) are created.
 - Title, prices and images are not adjusted.
+- If the product is completely deleted in Printful, the product remains untouched in Shopware.
 
 ### Prerequisites
 - Java 14 JRE or JDK
