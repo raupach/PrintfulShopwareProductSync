@@ -72,6 +72,8 @@ public class SyncService implements CommandLineRunner {
             }
         });
 
+        shopwareService.clearCache();
+
     }
 
     private Optional<ShopwareProduct> findProduct(BigInteger printfulProductId, List<ShopwareProduct> existingProducts) {

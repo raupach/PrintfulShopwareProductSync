@@ -8,12 +8,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Getter
 @Setter
-public class ShopwareProduct {
+public class Relationship {
 
-    private String id;
-    private String type;
-    private ProductAttribute attributes;
-    private Relationships relationships;
+    private Links links;
 
     @Override
     public String toString() {

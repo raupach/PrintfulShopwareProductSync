@@ -26,6 +26,7 @@ public class ShopwareHttpClient {
     private static final String TAX = "tax";
     private static final String OPTIONS = "/options";
     private static final String PRODUCT_CONFIGURATOR_SETTING = "product-configurator-setting";
+    private static final String ACTION_CACHE_WARMUP = "/_action/cache_warmup";
 
     @Autowired
     @Qualifier("shopware")
@@ -208,4 +209,17 @@ public class ShopwareHttpClient {
         return currencyResponse.getData();
     }
 
+    public Mono<ErrorContainer> clearCache() {
+        return shopwareWebClient.delete()
+                .uri(shopwareSyncProperties.getUrl() + ACTION_CACHE_WARMUP)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().equals(HttpStatus.NO_CONTENT)) {
+                        return Mono.empty();
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(ErrorContainer.class);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
 }

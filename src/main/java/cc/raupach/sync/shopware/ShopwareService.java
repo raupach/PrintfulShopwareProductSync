@@ -430,4 +430,14 @@ public class ShopwareService {
             }
         });
     }
+
+    public void clearCache() {
+        Mono<ErrorContainer> response = shopwareHttpClient.clearCache();
+        Object message = response.block();
+        if (message == null) {
+            log.info("Shopware cache cleared.");
+        } else {
+            throw new RuntimeException(message.toString());
+        }
+    }
 }
