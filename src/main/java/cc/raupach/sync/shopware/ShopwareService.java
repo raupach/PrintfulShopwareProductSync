@@ -79,7 +79,7 @@ public class ShopwareService {
 
         Mono<Object> response = shopwareHttpClient.createPropertyGroup(createColorPropertyGroup);
         Object message = response.block();
-        if (message == null) {
+        if (message != null) {
             throw new RuntimeException( message.toString());
         } else {
             log.info("PropertyGroup {} created.", name);
@@ -145,7 +145,7 @@ public class ShopwareService {
 
         Mono<Object> mediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(mediaId, mediaUrlUpload, "png");
         message = mediaUploadResult.block();
-        if (message == null) {
+        if (message != null) {
             throw new RuntimeException(message.toString());
         } else {
             log.info("Media OK. ID: {}", mediaId);
@@ -206,7 +206,7 @@ public class ShopwareService {
 
         Mono<Object> resultVariant = shopwareHttpClient.createProduct(shopwareVariantProduct);
         Object resultMessage = resultVariant.block();
-        if (resultMessage == null) {
+        if (resultMessage != null) {
             throw new RuntimeException(resultMessage.toString());
         } else {
             log.info("Variant OK. ID: {}", variantId);
@@ -221,8 +221,8 @@ public class ShopwareService {
 
             Mono<Object> variantMediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(variantMediaId, variantMediaUrlUpload, "png");
             Object variantMessage = variantMediaUploadResult.block();
-            if (variantMessage == null) {
-                throw new RuntimeException(resultMessage.toString());
+            if (variantMessage != null) {
+                throw new RuntimeException(variantMessage.toString());
             } else {
                 log.info("VariantMedia OK. ID: {}", variantMediaId);
             }
@@ -305,7 +305,7 @@ public class ShopwareService {
 
         Mono<Object> response = shopwareHttpClient.createPropertyGroupOption(propertyGroupId, createPropertyGroupOption);
         Object message = response.block();
-        if (message == null) {
+        if (message != null) {
             throw new RuntimeException(message.toString());
         } else {
             log.info("PropertyGroupOption {} created.", createPropertyGroupOption.getName());
