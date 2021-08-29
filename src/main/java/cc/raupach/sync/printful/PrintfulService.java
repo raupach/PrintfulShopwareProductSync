@@ -1,6 +1,7 @@
 package cc.raupach.sync.printful;
 
 
+import cc.raupach.sync.config.PrintfulSyncProperties;
 import cc.raupach.sync.printful.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class PrintfulService {
     @Autowired
     private PrintfulHttpClient printfulHttpClient;
 
+    @Autowired
+    private PrintfulSyncProperties printfulSyncProperties;
+
     public List<Product> getStoreProducts() {
         ProductRequest productRequest = printfulHttpClient.getProducts();
         log.info("Get {} Printful products: {}",productRequest.getResult().size(), productRequest);
@@ -38,10 +42,24 @@ public class PrintfulService {
         List<BigInteger> ids = variants.stream().map(v -> v.getProduct().getVariant_id()).collect(Collectors.toList());
         Flux<CatalogVariantDetail> variantDetailFlux = printfulHttpClient.getCatalogVariant(ids);
         Map<BigInteger, CatalogVariant> printfulCatalogVariants = variantDetailFlux
-                .collectMap(k -> k.getResult().getVariant().getId(), v -> v.getResult().getVariant()).block();
+                .map(this::mapPropertyOptions)
+                .collectMap(CatalogVariant::getId, v -> v).block();
 
         log.info("Get {} CatalogVariants", printfulCatalogVariants.size());
         return printfulCatalogVariants;
+    }
+
+    private CatalogVariant mapPropertyOptions(CatalogVariantDetail v) {
+        CatalogVariant variant = v.getResult().getVariant();
+        if (printfulSyncProperties.getOptionMappings().containsKey(variant.getSize())) {
+            variant.setSize(printfulSyncProperties.getOptionMappings().get(variant.getSize()));
+        }
+
+        if (printfulSyncProperties.getOptionMappings().containsKey(variant.getColor())) {
+            variant.setSize(printfulSyncProperties.getOptionMappings().get(variant.getColor()));
+        }
+
+        return variant;
     }
 
     public Double findMainProductPrice(List<SyncVariant> variants) {

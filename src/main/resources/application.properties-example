@@ -10,6 +10,15 @@ spring.security.oauth2.client.provider.sw.token-uri=https://<INSERT YOUR SHOPWAR
 # Custom
 sync.printful.url=https://api.printful.com/
 sync.printful.apiKey=<INSERT YOUR PRINTFUL SHOP API KEY>
+
+# There are some printful options that are unsuitable for a store in another language (e.g. 11oz).
+# You can map printfull variant options to shopware options.
+sync.printful.optionMappings.11oz=312g
+sync.printful.optionMappings.15oz=425g
+sync.printful.optionMappings.'5.5x5.5'=14x14
+sync.printful.optionMappings.3x3=7.5x7.5
+sync.printful.optionMappings.4x4=10x10
+
 sync.shopware.url=https://<INSERT YOUR SHOPWARE-DOMAIN>/api/
 
 # The name of your shopware tax rate
@@ -20,3 +29,6 @@ sync.shopware.colorOptionGroupName=Printful_Color
 
 # The name of your size option group
 sync.shopware.sizeOptionGroupName=Printful_Size
+
+# Initial stock level with which a product/variant is started.
+sync.shopware.initialStock=10000

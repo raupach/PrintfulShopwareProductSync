@@ -79,7 +79,11 @@ public class ShopwareService {
 
         Mono<Object> response = shopwareHttpClient.createPropertyGroup(createColorPropertyGroup);
         Object message = response.block();
-        log.info(message == null ? "PropertyGroup " + name + " created." : message.toString());
+        if (message != null) {
+            throw new RuntimeException( message.toString());
+        } else {
+            log.info("PropertyGroup {} created.", name);
+        }
     }
 
     public String getShopwareUUID() {
@@ -110,7 +114,7 @@ public class ShopwareService {
                 .id(productId)
                 .name(product.getName())
                 .productNumber(product.getId().toString())
-                .stock(10)
+                .stock(shopwareSyncProperties.getInitialStock())
                 .parentId(null)
                 .taxId(getTaxId())
                 .price(Collections.singletonList(productPrice))
@@ -141,8 +145,11 @@ public class ShopwareService {
 
         Mono<Object> mediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(mediaId, mediaUrlUpload, "png");
         message = mediaUploadResult.block();
-        log.info(message == null ? "Media OK. ID: " + mediaId : message.toString());
-
+        if (message != null) {
+            throw new RuntimeException(message.toString());
+        } else {
+            log.info("Media OK. ID: {}", mediaId);
+        }
         return productId;
     }
 
@@ -158,7 +165,7 @@ public class ShopwareService {
         CreateProduct shopwareVariantProduct = CreateProduct.builder()
                 .id(variantId)
                 .productNumber(variant.getId().toString())
-                .stock(10)
+                .stock(shopwareSyncProperties.getInitialStock())
                 .parentId(productId)
                 .taxId(getTaxId())
                 .price(Collections.singletonList(ProductPrice.builder()
@@ -199,8 +206,11 @@ public class ShopwareService {
 
         Mono<Object> resultVariant = shopwareHttpClient.createProduct(shopwareVariantProduct);
         Object resultMessage = resultVariant.block();
-        log.info(resultMessage == null ? "Variant OK. ID: " + variantId : resultMessage.toString());
-
+        if (resultMessage != null) {
+            throw new RuntimeException(resultMessage.toString());
+        } else {
+            log.info("Variant OK. ID: {}", variantId);
+        }
 
         if (previewOpt.isPresent()) {
             File preview = previewOpt.get();
@@ -211,8 +221,11 @@ public class ShopwareService {
 
             Mono<Object> variantMediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(variantMediaId, variantMediaUrlUpload, "png");
             Object variantMessage = variantMediaUploadResult.block();
-            log.info(variantMessage == null ? "VariantMedia OK. ID: " + variantMediaId : variantMessage.toString());
-
+            if (variantMessage != null) {
+                throw new RuntimeException(variantMessage.toString());
+            } else {
+                log.info("VariantMedia OK. ID: {}", variantMediaId);
+            }
         }
     }
 
@@ -292,7 +305,11 @@ public class ShopwareService {
 
         Mono<Object> response = shopwareHttpClient.createPropertyGroupOption(propertyGroupId, createPropertyGroupOption);
         Object message = response.block();
-        log.info(message == null ? "PropertyGroupOption " + createPropertyGroupOption.getName() + " created." : message.toString());
+        if (message != null) {
+            throw new RuntimeException(message.toString());
+        } else {
+            log.info("PropertyGroupOption {} created.", createPropertyGroupOption.getName());
+        }
     }
 
 
@@ -429,5 +446,15 @@ public class ShopwareService {
                 }
             }
         });
+    }
+
+    public void clearCache() {
+        Mono<ErrorContainer> response = shopwareHttpClient.clearCache();
+        Object message = response.block();
+        if (message == null) {
+            log.info("Shopware cache cleared.");
+        } else {
+            throw new RuntimeException(message.toString());
+        }
     }
 }

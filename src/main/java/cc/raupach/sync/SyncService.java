@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class SyncService implements CommandLineRunner {
 
 
-   @Autowired
+    @Autowired
     private ShopwareService shopwareService;
 
     @Autowired
@@ -71,6 +71,8 @@ public class SyncService implements CommandLineRunner {
                         .forEach(variant -> shopwareService.createVariant(existingProduct.getId(), variant, finalShopwarePropertyOptions, printfulCatalogVariants));
             }
         });
+
+        shopwareService.clearCache();
 
     }
 
