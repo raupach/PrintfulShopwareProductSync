@@ -7,7 +7,7 @@ sync.printful.apiKey=<INSERT YOUR PRINTFUL SHOP API KEY>
 # You can map printful variant options to shopware options.
 sync.printful.optionMappings={ \
   '11oz': '325ml', \
-  '5oz': '444ml', \
+  '15oz': '444ml', \
   '5.5x5.5': '14x14',\
   '3x3': '7.5x7.5', \
   '4x4': '10x10', \
