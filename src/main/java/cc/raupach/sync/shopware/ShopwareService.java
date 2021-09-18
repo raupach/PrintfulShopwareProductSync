@@ -143,7 +143,9 @@ public class ShopwareService {
                 .url(product.getThumbnail_url())
                 .build();
 
-        Mono<Object> mediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(mediaId, mediaUrlUpload, "png");
+        String extension = getFormatOfUrl(product.getThumbnail_url());
+
+        Mono<Object> mediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(mediaId, mediaUrlUpload, extension);
         message = mediaUploadResult.block();
         if (message != null) {
             throw new RuntimeException(message.toString());
@@ -151,6 +153,18 @@ public class ShopwareService {
             log.info("Media OK. ID: {}", mediaId);
         }
         return productId;
+    }
+
+    private String getFormatOfUrl(String thumbnail_url) {
+        if (StringUtils.endsWithIgnoreCase(thumbnail_url, "png")){
+            return "png";
+        } else if (StringUtils.endsWithIgnoreCase(thumbnail_url, "jpg")){
+            return "jpg";
+        } else if (StringUtils.endsWithIgnoreCase(thumbnail_url, "jpeg")){
+            return "jpg";
+        } else {
+            return "jpg";
+        }
     }
 
 
@@ -219,7 +233,9 @@ public class ShopwareService {
                     .url(preview.getPreview_url())
                     .build();
 
-            Mono<Object> variantMediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(variantMediaId, variantMediaUrlUpload, "png");
+            String extension = getFormatOfUrl(preview.getThumbnail_url());
+
+            Mono<Object> variantMediaUploadResult = shopwareHttpClient.uploadMediaResourceUrl(variantMediaId, variantMediaUrlUpload, extension);
             Object variantMessage = variantMediaUploadResult.block();
             if (variantMessage != null) {
                 throw new RuntimeException(variantMessage.toString());
@@ -246,10 +262,18 @@ public class ShopwareService {
         List<PropertyGroupOption> colorPropertyGroupOptions = shopwareHttpClient.getPropertyGroupsOptions(colorPropertyGroup.getId());
 
         Set<String> printfulSizes = new HashSet<>();
-        printfulCatalogVariants.forEach((id, catalogVariant) -> printfulSizes.add(catalogVariant.getSize()));
+        printfulCatalogVariants.forEach((id, catalogVariant) -> {
+            if (StringUtils.isNotBlank(catalogVariant.getSize())) {
+                printfulSizes.add(catalogVariant.getSize());
+            }
+        });
 
         Map<String, String> printfulColors = new HashMap<>();
-        printfulCatalogVariants.forEach((id, catalogVariant) -> printfulColors.put(catalogVariant.getColor(), catalogVariant.getColor_code()));
+        printfulCatalogVariants.forEach((id, catalogVariant) -> {
+            if (StringUtils.isNotBlank(catalogVariant.getColor())) {
+                printfulColors.put(catalogVariant.getColor(), catalogVariant.getColor_code());
+            }
+        });
 
         List<PropertyGroupOption> finalSizePropertyGroupOptions = sizePropertyGroupOptions;
         printfulSizes.forEach(printfulSize -> {
