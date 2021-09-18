@@ -6,15 +6,23 @@ sync.printful.apiKey=<INSERT YOUR PRINTFUL SHOP API KEY>
 # There are some printful options that are unsuitable for a store in another language (e.g. 11oz).
 # You can map printful variant options to shopware options.
 sync.printful.optionMappings={ \
-  '11oz': '325ml', \
-  '12oz': '355ml', \
-  '15oz': '444ml', \
-  '5.5x5.5': '14 x 14 cm',\
-  '3x3': '7,5 x 7,5 cm', \
-  '4x4': '10 x 10 cm', \
-  '12x12': '30,5 x 30,5 cm', \
-  '16x15': '40,6 x 40,6 cm', \
-  '5.83\"×8.27\"': '21 x 14,8 cm' \
+   '11oz': '325ml', \
+   '12oz': '355ml', \
+   '15oz': '444ml', \
+   '5.5x5.5': '14 x 14 cm',\
+   '3x3': '7,5 x 7,5 cm', \
+   '4x4': '10 x 10 cm', \
+   '10x10': '25,5 x 25,5 cm', \
+   '10×10': '25,5 x 25,5 cm', \
+   '12x12': '30,5 x 30,5 cm', \
+   '12×12': '30,5 x 30,5 cm', \
+   '14x14': '35,5 x 35,5 cm', \
+   '14×14': '35,5 x 35,5 cm', \
+   '16x16': '40,6 x 40,6 cm', \
+   '16×16': '40,6 x 40,6 cm', \
+   '18x18': '45,7 x 45,7 cm', \
+   '18×18': '45,7 x 45,7 cm', \
+   '5.83\"×8.27\"': '21 x 14,8 cm' \
   }
 
 # Shopware
