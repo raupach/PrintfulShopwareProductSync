@@ -4,6 +4,7 @@ import cc.raupach.sync.config.PrintfulSyncProperties;
 import cc.raupach.sync.printful.dto.CatalogVariantDetail;
 import cc.raupach.sync.printful.dto.ProductRequest;
 import cc.raupach.sync.printful.dto.ProductDetailRequest;
+import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,8 +34,11 @@ public class PrintfulHttpClient {
     @Qualifier("printful")
     private WebClient printfulWebClient;
 
-    public ProductRequest getProducts() {
+    final RateLimiter rateLimiter = RateLimiter.create(2.0);
 
+    public ProductRequest getProducts() {
+        double sleep = rateLimiter.acquire();
+        log.info("Sleep: {}",sleep);
         return printfulWebClient.get()
                 .uri(printfulSyncProperties.getUrl() + STORE_PRODUCTS)
                 .header("Authorization", "Basic " + Base64Utils.encodeToString(printfulSyncProperties.getApiKey().getBytes(UTF_8)))
@@ -45,7 +49,8 @@ public class PrintfulHttpClient {
 
 
     public ProductDetailRequest getProductDetail(BigInteger id) {
-
+        double sleep = rateLimiter.acquire();
+        log.info("Sleep: {}",sleep);
         return printfulWebClient.get()
                 .uri(printfulSyncProperties.getUrl() + STORE_PRODUCTS + "/" +id)
                 .header("Authorization", "Basic " + Base64Utils.encodeToString(printfulSyncProperties.getApiKey().getBytes(UTF_8)))
@@ -55,7 +60,8 @@ public class PrintfulHttpClient {
     }
 
     public Mono<CatalogVariantDetail> getCatalogVariant(BigInteger variantId) {
-
+        double sleep = rateLimiter.acquire();
+        log.info("Sleep: {}",sleep);
         log.debug("getCatalogVariant({}})", variantId);
 
         return printfulWebClient.get()

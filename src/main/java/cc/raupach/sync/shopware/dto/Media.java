@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class Media {
 
     private String id;
+//    private String fileName;
 
     @Override
     public String toString() {

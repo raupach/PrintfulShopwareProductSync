@@ -4,6 +4,7 @@ package cc.raupach.sync.printful;
 import cc.raupach.sync.config.PrintfulSyncProperties;
 import cc.raupach.sync.printful.dto.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -51,6 +52,10 @@ public class PrintfulService {
 
     private CatalogVariant mapPropertyOptions(CatalogVariantDetail v) {
         CatalogVariant variant = v.getResult().getVariant();
+
+        // remove ugly '″'
+        variant.setSize(StringUtils.replaceChars(variant.getSize(), "″", "\""));
+
         if (printfulSyncProperties.getOptionMappings().containsKey(variant.getSize())) {
             variant.setSize(printfulSyncProperties.getOptionMappings().get(variant.getSize()));
         }
