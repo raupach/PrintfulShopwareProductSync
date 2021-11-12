@@ -54,7 +54,7 @@ public class PrintfulService {
         CatalogVariant variant = v.getResult().getVariant();
 
         // remove ugly '″'
-        variant.setSize(StringUtils.replaceChars(variant.getSize(), "″", "\""));
+        variant.setSize(StringUtils.replaceChars(variant.getSize(), "″\"", ""));
 
         if (printfulSyncProperties.getOptionMappings().containsKey(variant.getSize())) {
             variant.setSize(printfulSyncProperties.getOptionMappings().get(variant.getSize()));
