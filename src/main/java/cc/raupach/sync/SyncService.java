@@ -1,6 +1,5 @@
 package cc.raupach.sync;
 
-import cc.raupach.sync.config.PrintfulSyncProperties;
 import cc.raupach.sync.printful.PrintfulService;
 import cc.raupach.sync.printful.dto.CatalogVariant;
 import cc.raupach.sync.printful.dto.Product;
@@ -30,9 +29,6 @@ public class SyncService {
 
     @Autowired
     private PrintfulService printfulService;
-
-    @Autowired
-    private PrintfulSyncProperties printfulSyncProperties;
 
     public void run() {
 

@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -40,18 +39,23 @@ public class PrintfulService {
     }
 
     public Map<BigInteger, CatalogVariant> getCatalogVariants(List<SyncVariant> variants) {
+
+        SyncVariant v1 = variants.stream().findFirst().orElseThrow();
+        BigInteger productId = v1.getProduct().getProduct_id();
+        List<CatalogVariant> catalogVariants = printfulHttpClient.getCatalogVariantForProduct(productId);
+
         List<BigInteger> ids = variants.stream().map(v -> v.getProduct().getVariant_id()).collect(Collectors.toList());
-        Flux<CatalogVariantDetail> variantDetailFlux = printfulHttpClient.getCatalogVariant(ids);
-        Map<BigInteger, CatalogVariant> printfulCatalogVariants = variantDetailFlux
+
+        Map<BigInteger, CatalogVariant> printfulCatalogVariants = catalogVariants.stream()
+                .filter(v -> ids.contains(v.getId()))
                 .map(this::mapPropertyOptions)
-                .collectMap(CatalogVariant::getId, v -> v).block();
+                .collect(Collectors.toMap(CatalogVariant::getId, v -> v));
 
         log.info("Get {} CatalogVariants", printfulCatalogVariants.size());
         return printfulCatalogVariants;
     }
 
-    private CatalogVariant mapPropertyOptions(CatalogVariantDetail v) {
-        CatalogVariant variant = v.getResult().getVariant();
+    private CatalogVariant mapPropertyOptions(CatalogVariant variant) {
 
         // remove ugly '″'
         variant.setSize(StringUtils.replaceChars(variant.getSize(), "″\"", ""));

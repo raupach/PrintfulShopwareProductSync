@@ -1,16 +1,18 @@
 package cc.raupach.sync.printful.dto;
 
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.List;
 
 @Getter
 @Setter
-public class CatalogVariantDetail extends BaseDto {
+public class CatalogVariantDetailListResult {
 
-    private CatalogVariantDetailResult result;
+    private List<CatalogVariant> variants;
 
     @Override
     public String toString() {
